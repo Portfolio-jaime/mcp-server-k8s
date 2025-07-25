@@ -1,0 +1,290 @@
+{
+  "name": "ArgoCD-MCP-Server",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "argocd-mcp-dev",
+  "workspaceFolder": "/workspace",
+  
+  // Configuración de VS Code
+  "customizations": {
+    "vscode": {
+      // Extensiones que se instalarán automáticamente
+      "extensions": [
+        // Kubernetes y DevOps
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker",
+        
+        // Desarrollo Node.js/TypeScript
+        "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        
+        // Git y control de versiones
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        
+        // Herramientas de desarrollo
+        "ms-vscode.vscode-npm-dependency-links",
+        "christian-kohler.npm-intellisense",
+        "bradlc.vscode-tailwindcss",
+        
+        // Utilidades
+        "ms-vscode.hexeditor",
+        "ms-vscode.live-server",
+        "ms-vsliveshare.vsliveshare",
+        
+        // Terminal y Shell
+        "ms-vscode.remote-containers",
+        "ms-terminal.remote-terminal-provider"
+      ],
+      
+      // Configuración de VS Code
+      "settings": {
+        // Configuración de Kubernetes
+        "vs-kubernetes": {
+          "vs-kubernetes.kubectl-path": "/usr/local/bin/kubectl",
+          "vs-kubernetes.helm-path": "/usr/local/bin/helm",
+          "vs-kubernetes.minikube-path": "/usr/local/bin/minikube",
+          "vs-kubernetes.draft-path": "",
+          "vs-kubernetes.draft-enabled": false,
+          "vs-kubernetes.outputFormat": "yaml",
+          "vs-kubernetes.kubeconfig": "/home/node/.kube/config",
+          "vs-kubernetes.knownKubeconfigs": [
+            "/home/node/.kube/config"
+          ],
+          "vs-kubernetes.autoCleanupOnDebugTerminate": true,
+          "vs-kubernetes.nodejs-autodetect-remote-root": true,
+          "vs-kubernetes.nodejs-remote-root": "/workspace",
+          "vs-kubernetes.use-wsl": false
+        },
+        
+        // Configuración de YAML
+        "yaml.schemas": {
+          "kubernetes": [
+            "*.yaml",
+            "*.yml",
+            "k8s/**/*.yaml",
+            "k8s/**/*.yml",
+            "kubernetes/**/*.yaml",
+            "kubernetes/**/*.yml"
+          ],
+          "helm": [
+            "charts/**/*.yaml",
+            "charts/**/*.yml",
+            "templates/**/*.yaml",
+            "templates/**/*.yml"
+          ]
+        },
+        "yaml.format.enable": true,
+        "yaml.validate": true,
+        "yaml.hover": true,
+        "yaml.completion": true,
+        
+        // Configuración de TypeScript
+        "typescript.preferences.includePackageJsonAutoImports": "auto",
+        "typescript.suggest.autoImports": true,
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "typescript.preferences.importModuleSpecifier": "relative",
+        
+        // Configuración de ESLint y Prettier
+        "eslint.enable": true,
+        "eslint.format.enable": true,
+        "prettier.enable": true,
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        
+        // Configuración de archivos
+        "files.associations": {
+          "*.yaml": "yaml",
+          "*.yml": "yaml",
+          "Dockerfile*": "dockerfile",
+          "*.dockerignore": "ignore",
+          ".helmignore": "ignore"
+        },
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/.git": true,
+          "**/.DS_Store": true,
+          "**/Thumbs.db": true
+        },
+        "files.watcherExclude": {
+          "**/node_modules/**": true,
+          "**/dist/**": true
+        },
+        
+        // Configuración del editor
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false,
+        "editor.minimap.enabled": true,
+        "editor.wordWrap": "on",
+        "editor.rulers": [80, 120],
+        "editor.bracketPairColorization.enabled": true,
+        "editor.guides.bracketPairs": true,
+        
+        // Configuración del terminal
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash",
+            "args": ["-l"]
+          }
+        },
+        "terminal.integrated.cwd": "/workspace",
+        "terminal.integrated.env.linux": {
+          "KUBECONFIG": "/home/node/.kube/config"
+        },
+        
+        // Configuración de Git
+        "git.autofetch": true,
+        "git.enableSmartCommit": true,
+        "git.confirmSync": false,
+        "git.defaultCloneDirectory": "/workspace",
+        
+        // Configuración de búsqueda
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/*.log": true
+        },
+        
+        // Configuración del explorador
+        "explorer.confirmDelete": false,
+        "explorer.confirmDragAndDrop": false,
+        
+        // Configuración de Docker
+        "docker.defaultRegistryPath": "",
+        "docker.dockerPath": "docker",
+        "docker.machineNaming": "default",
+        
+        // Configuración de Live Share
+        "liveshare.featureSet": "stable",
+        "liveshare.allowGuestDebugControl": true,
+        "liveshare.allowGuestTaskControl": true,
+        
+        // Configuración de rendimiento
+        "extensions.autoUpdate": false,
+        "update.mode": "manual",
+        "telemetry.telemetryLevel": "off"
+      }
+    }
+  },
+  
+  // Configuración de puertos que se reenviarán automáticamente
+  "forwardPorts": [
+    3000,  // MCP Server
+    3002,  // MCP HTTP Server
+    8080,  // Apps web
+    8081,  // Dashboard
+    9090,  // Prometheus
+    3001,  // Grafana
+    8082   // Docs
+  ],
+  
+  // Etiquetas de puertos
+  "portsAttributes": {
+    "3000": {
+      "label": "MCP Server",
+      "onAutoForward": "notify"
+    },
+    "3002": {
+      "label": "MCP HTTP Server",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Web Apps",
+      "onAutoForward": "openPreview"
+    },
+    "9090": {
+      "label": "Prometheus",
+      "onAutoForward": "silent"
+    },
+    "3001": {
+      "label": "Grafana",
+      "onAutoForward": "silent"
+    },
+    "8082": {
+      "label": "Documentation",
+      "onAutoForward": "ignore"
+    }
+  },
+  
+  // Script que se ejecuta después de crear el container - DESHABILITADO para ejecución manual
+  // "postCreateCommand": "bash .devcontainer/post-create.sh",
+  
+  // Script que se ejecuta al iniciar el container
+  "postStartCommand": "echo '🚀 DevContainer iniciado! Ejecuta manualmente: bash .devcontainer/post-create.sh'",
+  
+  // Script que se ejecuta al adjuntar VS Code
+  "postAttachCommand": {
+    "server": "echo '📡 VS Code conectado al DevContainer'",
+    "client": "echo '💻 Para configurar el entorno ejecuta: bash .devcontainer/post-create.sh'"
+  },
+  
+  // Configuración de usuario remoto
+  "remoteUser": "node",
+  "remoteEnv": {
+    "PATH": "/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/home/node/.local/bin",
+    "KUBECONFIG": "/home/node/.kube/config",
+    "HELM_CONFIG_HOME": "/home/node/.config/helm",
+    "NODE_ENV": "development"
+  },
+  
+  // Configuración de montajes
+  "mounts": [
+    // Cache de SSH para Git
+    "source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached",
+    
+    // Configuración de Git global
+    "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,consistency=cached"
+  ],
+  
+  // Configuración de características adicionales
+  "features": {
+    // Herramientas comunes
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": false,
+      "installOhMyZsh": false,
+      "upgradePackages": true,
+      "username": "node",
+      "userUid": "automatic",
+      "userGid": "automatic"
+    },
+    
+    // Git (versión más reciente)
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": true
+    },
+    
+    // Docker-in-Docker para completo aislamiento
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    }
+  },
+  
+  // Configuración de lifecycle scripts
+  "onCreateCommand": "echo '🔨 Creando DevContainer...'",
+  "updateContentCommand": "echo '🔄 Actualizando contenido...'",
+  "waitFor": "postCreateCommand",
+  
+  // Configuración de seguridad para Docker-in-Docker
+  "privileged": true,
+  "capAdd": ["SYS_PTRACE"],
+  "securityOpt": ["seccomp=unconfined"],
+  
+  // Configuración de recursos
+  "runArgs": [
+    "--name=k8s-mcp-devcontainer",
+    "--hostname=k8s-mcp-dev"
+  ],
+  
+  // Configuración de cierre
+  "shutdownAction": "stopCompose"
+}

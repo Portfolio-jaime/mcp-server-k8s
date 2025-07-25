@@ -1,0 +1,160 @@
+services:
+  # Servicio principal de desarrollo
+  argocd-mcp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        KUBECTL_VERSION: v1.28.4
+        HELM_VERSION: v3.13.2
+        MINIKUBE_VERSION: v1.32.0
+    container_name: argocd-mcp-development
+    hostname: argocd-mcp-dev
+    
+    # Configuración de red - SOLO puertos esenciales para evitar conflictos
+    ports:
+      - "3000:3000"     # MCP Server
+      - "3002:3002"     # MCP HTTP Server
+      - "8080:8080"     # Aplicaciones web
+      - "8081:8081"     # Dashboard alternativo
+      - "9090:9090"     # Prometheus
+      - "3001:3001"     # Grafana
+      # Puertos NodePort para servicios K8s
+      - "30080:30080"   # ArgoCD Server HTTP
+      - "30081:30081"   # Nginx test app
+      - "30443:30443"   # ArgoCD Server HTTPS
+      - "30090:30090"   # Prometheus NodePort
+      - "30300:30300"   # Grafana NodePort
+    
+    # Montajes de volúmenes
+    volumes:
+      # Código fuente
+      - ../:/workspace:cached
+      
+      # Persistencia de configuración
+      - k8s-config:/home/node/.kube
+      - minikube-data:/home/node/.minikube
+      - helm-config:/home/node/.config/helm
+      - npm-cache:/home/node/.npm
+      
+      # Docker-in-Docker: NO montar socket del host para completo aislamiento
+      # - /var/run/docker.sock:/var/run/docker.sock
+      
+      # Cache de dependencias de Node.js
+      - node_modules_cache:/workspace/node_modules
+    
+    # Variables de entorno
+    environment:
+      - NODE_ENV=development
+      - MINIKUBE_DRIVER=docker
+      - MINIKUBE_IN_DOCKER=true
+      - MINIKUBE_HOME=/home/node/.minikube
+      - KUBECONFIG=/home/node/.kube/config
+      - HELM_CONFIG_HOME=/home/node/.config/helm
+      - HELM_CACHE_HOME=/home/node/.cache/helm
+      - HELM_DATA_HOME=/home/node/.local/share/helm
+      # Configuración específica para macOS
+      - MINIKUBE_WANTUPDATENOTIFICATION=false
+      - MINIKUBE_WANTREPORTERRORPROMPT=false
+    
+    # Configuración de usuario y privilegios
+    user: node
+    working_dir: /workspace
+    
+    # Configuración de red
+    networks:
+      - argocd-mcp-network
+    
+    # Dependencias de servicios - NO NECESARIO con Docker-in-Docker
+    # depends_on:
+    #   - docker-proxy
+    
+    # Configuración de recursos (reducida para macOS)
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+          cpus: '3'
+        reservations:
+          memory: 1G
+          cpus: '1'
+    
+    # Configuración de seguridad para Docker-in-Docker
+    privileged: true
+    security_opt:
+      - seccomp:unconfined
+    
+    # ❌ ELIMINADO COMPLETAMENTE: devices section
+    # NO incluir devices: - /dev/kvm:/dev/kvm porque no existe en macOS
+    
+    # Comando de inicio
+    command: >
+      bash -c "
+        echo '🚀 Iniciando entorno de desarrollo ArgoCD MCP para macOS...' &&
+        echo 'Sistema: macOS con Docker Desktop' &&
+        echo 'Driver Minikube: docker (sin KVM)' &&
+        sleep 5 &&
+        tail -f /dev/null
+      "
+    
+    # Configuración adicional
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  # Proxy para Docker daemon - NO NECESARIO con Docker-in-Docker
+  # docker-proxy:
+  #   image: alpine/socat:latest
+  #   container_name: argocd-mcp-docker-proxy
+  #   hostname: docker-proxy
+  #   command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   ports:
+  #     - "2375:2375"
+  #   networks:
+  #     - argocd-mcp-network
+  #   restart: unless-stopped
+
+  # Servicio de documentación (opcional)
+  docs:
+    image: nginx:alpine
+    container_name: argocd-mcp-docs
+    hostname: docs
+    ports:
+      - "8082:80"
+    volumes:
+      - ../README.md:/usr/share/nginx/html/index.md:ro
+      - ./nginx-docs.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - argocd-mcp-network
+    restart: unless-stopped
+    profiles:
+      - docs
+
+# Definición de volúmenes persistentes
+volumes:
+  k8s-config:
+    driver: local
+  
+  minikube-data:
+    driver: local
+  
+  helm-config:
+    driver: local
+  
+  npm-cache:
+    driver: local
+  
+  node_modules_cache:
+    driver: local
+
+# Definición de redes
+networks:
+  argocd-mcp-network:
+    name: argocd-mcp-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16

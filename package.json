@@ -1,0 +1,50 @@
+{
+  "name": "k8s-versions-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server para monitorear versiones de componentes Kubernetes con Helm y kubectl",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "start": "node dist/index.js",
+    "start:http": "node dist/http-server-simple.js",
+    "start:https": "node dist/https-server.js",
+    "dev": "concurrently \"npm run build:watch\" \"node --watch dist/index.js\"",
+    "dev:http": "concurrently \"npm run build:watch\" \"node --watch dist/http-server.js\"",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui",
+    "lint": "eslint src --ext .ts --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "setup": "npm run build && chmod +x scripts/*.sh",
+    "validate": "npm run type-check && npm run lint && npm run test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "yaml": "^2.3.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["mcp", "kubernetes", "helm", "kubectl", "monitoring", "versions"],
+  "author": "DevOps Team",
+  "license": "MIT"
+}
